@@ -96,7 +96,7 @@ void CalculatorMain::OnPlusMinusButtonClicked()
 
 void CalculatorMain::OnDecimalPointButtonClicked()
 {
-
+  processNumberInput(QString("."));
 }
 
 void CalculatorMain::OnEqualsButtonClicked()
