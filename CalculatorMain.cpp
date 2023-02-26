@@ -1,5 +1,6 @@
 #include "CalculatorMain.h"
 #include "./ui_CalculatorMain.h"
+#include <QDebug>
 
 CalculatorMain::CalculatorMain(QWidget *parent)
     : QWidget(parent)
@@ -7,6 +8,7 @@ CalculatorMain::CalculatorMain(QWidget *parent)
     , calculatedValue {}
     , operatorPressed {false}
     , lastOperator {}
+    , decimalPointPressed {false}
 {
   ui->setupUi(this);
   connectUIObjects();
@@ -96,7 +98,11 @@ void CalculatorMain::OnPlusMinusButtonClicked()
 
 void CalculatorMain::OnDecimalPointButtonClicked()
 {
-  processNumberInput(QString("."));
+  if (!decimalPointPressed)
+  {
+      processNumberInput(QString("."));
+      decimalPointPressed = true;
+  }
 }
 
 void CalculatorMain::OnEqualsButtonClicked()
@@ -104,35 +110,34 @@ void CalculatorMain::OnEqualsButtonClicked()
   double convertedValue = ui->calculatorNumberLineEdit->text().toDouble();
   double total = 0;
 
-  if (operatorPressed)
+
+  switch (lastOperator)
   {
-    switch (lastOperator)
-    {
-      case Operator::addition:
-        {
-          total = Add(convertedValue, calculatedValue);
-        }
-        break;
-      case Operator::subtraction:
-        {
-          total = Subtract(convertedValue, calculatedValue);
-        }
-        break;
-      case Operator::multiplication:
-        {
-          total = Multiply(convertedValue, calculatedValue);
-        }
-        break;
-      case Operator::division:
-        {
-          total = Divide(convertedValue, calculatedValue);
-        }
-        break;
-      case Operator::none:
-      default:
-        break;
-    }
+    case Operator::addition:
+      {
+        total = Add(convertedValue, calculatedValue);
+      }
+      break;
+    case Operator::subtraction:
+      {
+        total = Subtract(convertedValue, calculatedValue);
+      }
+      break;
+    case Operator::multiplication:
+      {
+        total = Multiply(convertedValue, calculatedValue);
+      }
+      break;
+    case Operator::division:
+      {
+        total = Divide(convertedValue, calculatedValue);
+      }
+      break;
+    case Operator::none:
+    default:
+      break;
   }
+
 
   ui->calculatorNumberLineEdit->setText(QString::number(total));
   lastOperator = Operator::none;
@@ -188,6 +193,7 @@ void CalculatorMain::OnClearAllButtonClicked()
   ui->calculatorNumberLineEdit->clear();
   calculatedValue = 0;
   operatorPressed = false;
+  decimalPointPressed = false;
 }
 
 double CalculatorMain::Add(double a, double b)
@@ -226,10 +232,13 @@ void CalculatorMain::processNumberInput(const QString &number)
   if (operatorPressed == true)
   {
     ui->calculatorNumberLineEdit->clear();
+    operatorPressed = false;
   }
 
+  qDebug() << "Number " << number;
   ui->calculatorNumberLineEdit->setText(ui->calculatorNumberLineEdit->text() + number);
-  operatorPressed = false;
+  qDebug() << "LineEditText " << ui->calculatorNumberLineEdit->text();
+  //operatorPressed = false;
 }
 
 

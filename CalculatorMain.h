@@ -30,6 +30,7 @@ private:
   double calculatedValue;
   bool operatorPressed;
   Operator lastOperator;
+  bool decimalPointPressed;
 
   void connectUIObjects();
   void processNumberInput(const QString & number);
