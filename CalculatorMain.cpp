@@ -155,7 +155,7 @@ void CalculatorMain::CheckPreviousEqualsOperation()
 {
   if (LastOperator == Operator::equal)
   {
-    CalculatedValue = ConvertLineEditTextToDouble();
+    OperatorPressed = true;
   }
 }
 
