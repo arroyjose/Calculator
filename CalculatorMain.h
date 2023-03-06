@@ -14,7 +14,8 @@ enum class Operator
   addition,
   subtraction,
   multiplication,
-  division
+  division,
+  equal
 };
 
 class CalculatorMain : public QWidget
@@ -25,15 +26,23 @@ public:
   CalculatorMain(QWidget *parent = nullptr);
   ~CalculatorMain();
 
+  void reset();
+
+  void CheckPreviousEqualsOperation();
+
 private:
   Ui::CalculatorWidget *ui;
-  double calculatedValue;
-  bool operatorPressed;
-  Operator lastOperator;
-  bool decimalPointPressed;
+  double CalculatedValue;
+  bool OperatorPressed;
+  Operator CurrentOperator;
+  Operator LastOperator;
+  double LastOperand;
+  bool DecimalPointPressed;
 
   void connectUIObjects();
   void processNumberInput(const QString & number);
+
+  double ConvertLineEditTextToDouble();
 
 private slots:
   void OnOneButtonClicked();

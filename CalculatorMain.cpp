@@ -5,10 +5,12 @@
 CalculatorMain::CalculatorMain(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::CalculatorWidget)
-    , calculatedValue {}
-    , operatorPressed {false}
-    , lastOperator {}
-    , decimalPointPressed {false}
+    , CalculatedValue {}
+    , OperatorPressed {false}
+    , CurrentOperator {}
+    , LastOperator {}
+    , LastOperand {}
+    , DecimalPointPressed {false}
 {
   ui->setupUi(this);
   connectUIObjects();
@@ -98,39 +100,41 @@ void CalculatorMain::OnPlusMinusButtonClicked()
 
 void CalculatorMain::OnDecimalPointButtonClicked()
 {
-  if (!decimalPointPressed)
+  if (!DecimalPointPressed)
   {
       processNumberInput(QString("."));
-      decimalPointPressed = true;
+      DecimalPointPressed = true;
   }
 }
 
 void CalculatorMain::OnEqualsButtonClicked()
 {
-  double convertedValue = ui->calculatorNumberLineEdit->text().toDouble();
-  double total = 0;
+  if (LastOperator != Operator::equal)
+  {
+    LastOperand = ui->calculatorNumberLineEdit->text().toDouble();
+    CurrentOperator = LastOperator;
+  }
 
-
-  switch (lastOperator)
+  switch (CurrentOperator)
   {
     case Operator::addition:
       {
-        total = Add(convertedValue, calculatedValue);
+        CalculatedValue = Add(LastOperand, CalculatedValue);
       }
       break;
     case Operator::subtraction:
       {
-        total = Subtract(convertedValue, calculatedValue);
+        CalculatedValue = Subtract(LastOperand, CalculatedValue);
       }
       break;
     case Operator::multiplication:
       {
-        total = Multiply(convertedValue, calculatedValue);
+        CalculatedValue = Multiply(LastOperand, CalculatedValue);
       }
       break;
     case Operator::division:
       {
-        total = Divide(convertedValue, calculatedValue);
+        CalculatedValue = Divide(LastOperand, CalculatedValue);
       }
       break;
     case Operator::none:
@@ -138,62 +142,93 @@ void CalculatorMain::OnEqualsButtonClicked()
       break;
   }
 
+  ui->calculatorNumberLineEdit->setText(QString::number(CalculatedValue));
+  LastOperator = Operator::equal;
+}
 
-  ui->calculatorNumberLineEdit->setText(QString::number(total));
-  lastOperator = Operator::none;
+double CalculatorMain::ConvertLineEditTextToDouble()
+{
+  return ui->calculatorNumberLineEdit->text().toDouble();
+}
+
+void CalculatorMain::CheckPreviousEqualsOperation()
+{
+  if (LastOperator == Operator::equal)
+  {
+    CalculatedValue = ConvertLineEditTextToDouble();
+  }
 }
 
 void CalculatorMain::OnAdditionButtonClicked()
 {
-  if (operatorPressed == false)
-    {double convertedValue = ui->calculatorNumberLineEdit->text().toDouble();
-    calculatedValue = Add(calculatedValue, convertedValue);
-    ui->calculatorNumberLineEdit->setText(QString::number(calculatedValue));
-    operatorPressed = true;
-    lastOperator = Operator::addition;
+  CheckPreviousEqualsOperation();
+
+  if (OperatorPressed == false)
+  {
+    double convertedValue = ConvertLineEditTextToDouble();
+    CalculatedValue = Add(CalculatedValue, convertedValue);
+    ui->calculatorNumberLineEdit->setText(QString::number(CalculatedValue));
+    OperatorPressed = true;
   }
+
+  LastOperator = Operator::addition;
 }
 
 void CalculatorMain::OnSubtractionButtonClicked()
 {
-  if (operatorPressed == false)
+  CheckPreviousEqualsOperation();
+
+  if (OperatorPressed == false)
   {
     double convertedValue = ui->calculatorNumberLineEdit->text().toDouble();
-    calculatedValue = Subtract(calculatedValue, convertedValue);
-    ui->calculatorNumberLineEdit->setText(QString::number(calculatedValue));
-    operatorPressed = true;
-    lastOperator = Operator::subtraction;
+    CalculatedValue = Subtract(CalculatedValue, convertedValue);
+    ui->calculatorNumberLineEdit->setText(QString::number(CalculatedValue));
+    OperatorPressed = true;
   }
+
+  LastOperator = Operator::subtraction;
 }
 
 void CalculatorMain::OnMultiplicationButtonClicked()
 {
-  if (operatorPressed == false)
+  CheckPreviousEqualsOperation();
+
+  if (OperatorPressed == false)
     {double convertedValue = ui->calculatorNumberLineEdit->text().toDouble();
-    calculatedValue = Multiply(calculatedValue, convertedValue);
-    ui->calculatorNumberLineEdit->setText(QString::number(calculatedValue));
-    operatorPressed = true;
-    lastOperator = Operator::multiplication;
+    CalculatedValue = Multiply(CalculatedValue, convertedValue);
+    ui->calculatorNumberLineEdit->setText(QString::number(CalculatedValue));
+    OperatorPressed = true;
   }
+
+  LastOperator = Operator::multiplication;
 }
 
 void CalculatorMain::OnDivisionButtonClicked()
 {
-  if (operatorPressed == false)
+  CheckPreviousEqualsOperation();
+
+  if (OperatorPressed == false)
     {double convertedValue = ui->calculatorNumberLineEdit->text().toDouble();
-    calculatedValue = Divide(calculatedValue, convertedValue);
-    ui->calculatorNumberLineEdit->setText(QString::number(calculatedValue));
-    operatorPressed = true;
-    lastOperator = Operator::division;
+    CalculatedValue = Divide(CalculatedValue, convertedValue);
+    ui->calculatorNumberLineEdit->setText(QString::number(CalculatedValue));
+    OperatorPressed = true;
   }
+
+  LastOperator = Operator::division;
+}
+
+void CalculatorMain::reset()
+{
+  OperatorPressed = false;
+  DecimalPointPressed = false;
+  LastOperator = Operator::none;
 }
 
 void CalculatorMain::OnClearAllButtonClicked()
 {
   ui->calculatorNumberLineEdit->clear();
-  calculatedValue = 0;
-  operatorPressed = false;
-  decimalPointPressed = false;
+  CalculatedValue = 0;
+  reset();
 }
 
 double CalculatorMain::Add(double a, double b)
@@ -229,10 +264,10 @@ double CalculatorMain::Divide(double a, double b)
 
 void CalculatorMain::processNumberInput(const QString &number)
 {
-  if (operatorPressed == true)
+  if (OperatorPressed == true)
   {
     ui->calculatorNumberLineEdit->clear();
-    operatorPressed = false;
+    OperatorPressed = false;
   }
 
   qDebug() << "Number " << number;
