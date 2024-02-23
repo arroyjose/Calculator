@@ -21,6 +21,8 @@ set(PROJECT_SOURCES
         CalculatorMain.ui
 )
 
+add_subdirectory(unit)
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(Calculator
         MANUAL_FINALIZATION
